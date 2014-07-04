@@ -172,14 +172,7 @@ inline void regw(Operand opa, VM &v, float val) {
 //refactored into a separate function to avoid too much code repetition.
 inline void jmp(int where, VM &v) {
   if (v.symbols[where] < v.programSize) {
-   // v.beforeCursor = v.programCursor;
-    
-    //Add the jump to the call stack
-   // v.callstack[v.callstackPointer] = v.programCursor;
-   // v.callstackPointer++;
-
     v.programCursor = v.symbols[where];
-
     DEBUG_PLOG(("Jumped to %i\n", v.programCursor));
   }
 }
@@ -235,19 +228,10 @@ void dvm_run(VM &v) {
       
       //Moves the right value into a register. 
       case MOV: 
-        if (opa > 0 && opa < 13) {
+        if (opa > 0 && opa < 13) {  //Requires a register on the left side
           regw(opa, v, rValue);
           
           DEBUG_PLOG(("MOV %f into register %i\n", rValue, opa));
-        }
-        break;
-      
-      //Increments the value in a register
-      case INC:
-        if (opa > 0 && opa < 13) {
-          regw(opa, v, ++lValue);
-          
-          DEBUG_PLOG(("INC register %i\n", opa));
         }
         break;
       
@@ -307,6 +291,64 @@ void dvm_run(VM &v) {
         }
         break;
       
+      //////////////////////////////////////////////////////////////////////////
+      //Here come the math  
+
+      //Increments the value in a register by 1
+      case INC:
+        if (opa > 0 && opa < 13) {
+          regw(opa, v, ++lValue);
+          
+          DEBUG_PLOG(("INC register %i\n", opa));
+        }
+        break;
+
+      //Decrements the value in a register by 1
+      case DEC:
+        if (opa > 0 && opa < 13) {
+          regw(opa, v, --lValue);
+          
+          DEBUG_PLOG(("INC register %i\n", opa));
+        }
+        break;
+
+      //Add a value to the value of a register
+      case ADD:
+        if (opa > 0 && opa < 13) {
+          regw(opa, v, lValue + rValue);
+
+          DEBUG_PLOG(("ADD %f to %f in reg %i", rValue, lValue, opa));
+        }
+        break;
+
+      //Add a value to the value of a register
+      case SUB:
+        if (opa > 0 && opa < 13) {
+          regw(opa, v, lValue - rValue);
+
+          DEBUG_PLOG(("SUB %f from %f in reg %i", rValue, lValue, opa));
+        }
+        break;
+
+      //Multiply a value with the value of a register
+      case MUL:
+        if (opa > 0 && opa < 13) {
+          regw(opa, v, lValue * rValue);
+
+          DEBUG_PLOG(("MUL %f with %f in reg %i", lValue, rValue, opa));
+        }
+        break;
+
+      //Divide a value with the value of a register
+      case DIV:
+        if (opa > 0 && opa < 13 && rValue > 0) {
+          regw(opa, v, lValue / rValue);
+
+          DEBUG_PLOG(("DIV %f by %f in reg %i", lValue, rValue, opa));
+        }
+        break;
+
+
       //////////////////////////////////////////////////////////////////////////
       //Here come the jumps
 
