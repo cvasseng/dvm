@@ -50,7 +50,7 @@ In byte code the program looks like this:
 ## Built-in functions
 
 There are a few pre-defined C bindings enabled by default. These are 
- * `printf` - will do printf("%i %i %i...", arg1, arg2, arg3, ...)
+ * `printf` - will do `printf("%i %i %i...", arg1, arg2, arg3, ...)`
 
 They're called as such in DVM ASM:
     
