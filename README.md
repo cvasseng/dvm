@@ -50,7 +50,7 @@ In byte code the program looks like this:
 
 ## Using DVM as an embedded scripting solution
 
-Include the files in src/ in your project. You only need to include `dbvm.h`.
+Include the cpp files in `src/` in your project. You only need to include `dvm.h`.
 To compile a DVM assembly program to bytecode, use `dvm_compile(const char* filename)`. It accepts a filename and returns a structure containing the 
 bytecode and the size of the program. This can be fed into the VM using `dvm_run`.
 
@@ -66,7 +66,7 @@ Example:
       
       return 0;
     }
-      
+
 
 ## Built-in functions
 
@@ -113,9 +113,9 @@ This is a list of all the supported operations in the VM itself.
 Each instruction is 16 bits long, and includes both the operation itself
 and up to two operands (either registers or constant data). The operation is stored in byte 1, and the registers is stored in byte 2:
 
-  
-  | BIT 5-8 | BIT 3-4  | BIT 1-2  |
-  | OP CODE | OPERAND1 | OPERAND2 |
+| BIT 5-8 | BIT 3-4  | BIT 1-2  |
+|---------|----------|----------|
+| OP CODE | OPERAND1 | OPERAND2 |
 
 So in the case of the instruction `mov as,bs`, it would look like this `0x0912`
 in bytecode since the mov instruction is `9`, register `as` is `1` and register `bs`
