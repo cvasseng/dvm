@@ -20,3 +20,6 @@ that compiles to dvm bytecode.
 	  JL LOOP				;if (a < b) goto LOOP
 
 The program will do a loop until the value of the a and b registers are equal. 
+
+# Features
+
