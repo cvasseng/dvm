@@ -1,0 +1,25 @@
+MOV cs,#0					;cs = 0
+
+JMP START					;goto start
+
+; A subroutine
+fn TEST
+	INC cs					;cs++
+	DO OTHERTEST		;do subroutine on line 13
+	RET 						;return to line 24
+
+; A subroutine that calls another subroutine 
+fn OTHERTEST
+	INC cs					;cs++
+	RET 						;return to line 10
+
+START:
+
+	MOV as,#0				;as = 0
+	MOV bs,#5 			;bs = 10
+
+	LOOP: 				
+		INC as				;as++
+		DO TEST				;do subroutine
+		CMP as,bs 			
+		JL LOOP				;if (as < bs) goto LOOP
