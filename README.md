@@ -7,13 +7,17 @@ The implementation is written to be easy to read and understand, and to be small
 
 # Why
 
+I built it because I needed a small lightweight virtual machine for one of my own projects. Existing projects were generally way to large for my use case which was size limited. Once I started writing it I figured it might be useful for other 
+people, both in terms of serving an educational purpose and also as a very
+lean alternative/starting point for doing scripting in C/C++ applications.
+
 # Features
  * Sub routines
  * C functions can be bound and called from the VM
  * Mathematical operations (sin, cos, etc.)
  * Supports 16 and 32-bit integers as well as floats
  * 12 registers (4x 16 bit, 4x 32 bit, 4x float)
- * Comes with a compiler that compiles assembly-ish syntax to bytecode
+ * Comes with a simple parser/compiler that compiles assembly-ish syntax to bytecode
  * Does not require Boost or any other bloated libraries (the VM itself only rely on string.h, stdio.h (if logging is enabled) and math.h)
  * The VM core is less than 500 lines of well-commented code
 
@@ -80,6 +84,14 @@ This is a list of all the supported operations in the VM itself.
 todo
 
 # The DVM assembly language
+
+todo
+
+# Integrating in C/C++ applications
+
+todo
+
+# Further reading
 
 todo
 
