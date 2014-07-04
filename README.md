@@ -7,7 +7,7 @@ The implementation is written to be easy to read and understand, and to be small
 
 # Why
 
-I built it because I needed a small lightweight virtual machine for one of my own projects. Existing projects were generally way to large for my use case which was size limited. Once I started writing it I figured it might be useful for other 
+I built it because I needed a small lightweight virtual machine for one of my own projects. Existing projects were generally way too large for my use case which was size limited. Once I started writing it I figured it might be useful for other 
 people, both in terms of serving an educational purpose and also as a very
 lean alternative/starting point for doing scripting in C/C++ applications.
 
@@ -49,7 +49,15 @@ In byte code the program looks like this:
 
 ## Built-in functions
 
-todo
+There are a few pre-defined C bindings enabled by default. These are 
+ * `printf` - will do printf("%i %i %i...", arg1, arg2, arg3, ...)
+
+They're called as such in DVM ASM:
+    
+    arg as      ;push as onto the argument stack
+    arg bs      ;push bs onto the argument stack
+    call printf ;printf(as, bs)
+
 
 ## Build-Time Defines 
 
@@ -81,11 +89,26 @@ This is a list of all the supported operations in the VM itself.
 
 ## Bytecode Details
 
-todo
+Each instruction is 16 bits long, and includes both the operation itself
+and up to two operands (either registers or constant data). The operation is stored in byte 1, and the registers is stored in byte 2:
+
+  
+  | BIT 5-8 | BIT 3-4  | BIT 1-2  |
+  | OP CODE | OPERAND1 | OPERAND2 |
+
+So in the case of the instruction `mov as,bs`, it would look like this `0x0912`
+in bytecode since the mov instruction is `9`, register `as` is `1` and register `bs`
+is `2`. Instructions with constant values will instead of a register number have a 
+number corresponding with the data type of the constant, followed by the data 
+itself in separate 16 bit integers. So the instruction `mov as,#10` would look
+like this `0x091D 0x000A` in byte code. `9` is the mov operation, `1` is `as`, and `D` indicates that the right side has a constant and it's a 16-bit integer. The next 2 bytes is the number itself. It deduces the type of the constant based on the 
+register type on the left side. The registers ending in s are all 16-bit 
+(`as bs cs ds`), the registers ending in i are all 32-bit (`ii ji ki li`), and
+the registers ending in f are all floats (`xf, yf, zf, wf`).
 
 # The DVM assembly language
 
-todo
+The syntax is loosly based on NASM syntax.
 
 # Integrating in C/C++ applications
 
