@@ -41,7 +41,7 @@ In byte code the program looks like this:
 
 # License
 
-Copyright (c) 2014, Chris Vasseng
+Copyright (c) 2014, Chris Vasseng  
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
