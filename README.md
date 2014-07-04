@@ -6,8 +6,8 @@ A small virtual machine written in C/C++.
 The implementation is written to be easy to read and understand, and to be small (both in terms of the bytecode it runs on, and for the implementation). 
 
 # Features
-	* Sub routines
-	* Possible to call C functions from the VM
+ * Sub routines
+ * Possible to call C functions from the VM
 
 # Example program
 
@@ -26,11 +26,11 @@ that compiles to dvm bytecode.
 The program will do a loop until the value of the a and b registers are equal. 
 In byte code, the program looks like this:
 
-    0x091D 0x0000 //mov as,0
-    0x092D 0x000A //mov bs,10
-    0x1200 				//LOOP:
-    0x0210	 			//inc as
-    0x0E12				//cmp as,bs
-    0x1400				//jl loop
-    
-    
+    0x091D 0x0000     ;mov as,0
+    0x092D 0x000A     ;mov bs,10
+    0x1200 						;LOOP:
+    0x0210            ;inc as
+    0x0E12            ;cmp as,bs
+    0x1400            ;jl loop
+
+
