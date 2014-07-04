@@ -20,6 +20,7 @@ lean alternative/starting point for doing scripting in C/C++ applications.
  * Comes with a simple parser/compiler that compiles assembly-ish syntax to bytecode
  * Does not require Boost or any other bloated libraries (the VM itself only rely on string.h, stdio.h (if logging is enabled) and math.h)
  * The VM core is less than 500 lines of well-commented code
+ * String support and memory access with 16-bit addressing is coming
 
 # Example program
 
@@ -46,6 +47,26 @@ In byte code the program looks like this:
     0x1400            ;jl loop
 
 # Usage
+
+## Using DVM as an embedded scripting solution
+
+Include the files in src/ in your project. You only need to include `dbvm.h`.
+To compile a DVM assembly program to bytecode, use `dvm_compile(const char* filename)`. It accepts a filename and returns a structure containing the 
+bytecode and the size of the program. This can be fed into the VM using `dvm_run`.
+
+Example:
+    
+    #include "dvm.h"
+
+    int main(int argc, const char * argv[]) {
+
+      ProgramSource p = dvm_compile("examples/test.dvm");
+  
+      dvm_run(p.program, p.programSize);
+      
+      return 0;
+    }
+      
 
 ## Built-in functions
 
@@ -105,6 +126,14 @@ like this `0x091D 0x000A` in byte code. `9` is the mov operation, `1` is `as`, a
 register type on the left side. The registers ending in s are all 16-bit 
 (`as bs cs ds`), the registers ending in i are all 32-bit (`ii ji ki li`), and
 the registers ending in f are all floats (`xf, yf, zf, wf`).
+
+## Adding new operations
+
+Adding new operations is fairly simple. There's no need to change the parser/compiler
+to make it work, other than adding your operation to `ins_name_to_num` in
+`compiler.cpp`. The VM itself requires that you add the operations in two places;
+it must be added to the `Instruction` enum in `types.h`, and the logic must be
+implemented in the `switch` in `dvm_run` in `dvm.cpp`. That's pretty much it.
 
 # The DVM assembly language
 
