@@ -69,30 +69,33 @@ enum Instruction {
 
 
 //Register
+/* Yes, we don't really need to number everything, but
+   this lets us move stuff around without breaking 
+   existing bytecode */
 enum Operand {
   R_NONE = 0,
 
   //16-bit registers
-  R_AS, //1
-  R_BS, //2
-  R_CS, //3
-  R_DS, //4
+  R_AS = 1,
+  R_BS = 2, 
+  R_CS = 3, 
+  R_DS = 4, 
 
   //32-bit registers
-  R_II, //5
-  R_JI, //6
-  R_KI, //7
-  R_LI, //8
+  R_II = 5, 
+  R_JI = 6, 
+  R_KI = 7, 
+  R_LI = 8, 
 
   //Float registers
-  R_XF, //9
-  R_YF, //10
-  R_ZF, //11
-  R_WF, //12
+  R_XF = 9, 
+  R_YF = 10, 
+  R_ZF = 11, 
+  R_WF = 12, 
 
-  R_SH, //13: Short constant follows
-  R_FL, //14: Float constant follows
-  R_IN, //15: Int constant follows
+  R_SH = 13, //Short constant follows
+  R_FL = 14, //Float constant follows
+  R_IN = 15, //Int constant follows
 
 };
 
