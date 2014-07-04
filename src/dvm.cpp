@@ -29,12 +29,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*
 
-- data types determined by type of register.
-  supported:
-    * int16 [as, bs, cs, ds]
-    * int32 [ii, ji, ki, li]
-    * float [xf, yf, zf, wf]
-
   Test program:
 
   MOV as,#0       ;a = 0
@@ -51,16 +45,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   0x0920 0x000A //mov bs,10
   0x1200        //LOOP:
   0x0210        //inc as
-  0xE011        //cmp as,bs
+  0xE012        //cmp as,bs
   0x1400        //jl loop
 
-*/
 
+
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 
 #define MAX_PROGRAM_SIZE  1024
 #define MAX_SYMBOLS       256
+#define MAX_STACK_SIZE    64
+#define MAX_CALLSTACK     1024
 
 #define PROGRAM_LOG 1
 
@@ -75,43 +72,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 
 #include "dvm.h"
+#include "types.h"
 
-//Instructions supported by the VM
-enum Instruction {
-  NOP = 0,
-
-  //MATH OPERATIONS
-  ADD,    //1: Add something to a register
-  INC,    //2: Increase the value in a register
-  SUB,    //3: Subtract something from a register
-  MUL,    //4: Decrease the value in a register
-  DEC,    //5: Decrease the value in a register
-  DIV,    //6: Divide
-  SIN,    //7: Sin
-  COS,    //8: Cos
-  
-  //MISC
-  MOV,    //9: Move something into a register
-  PUSH,   //10: Push something to the stack
-  POP,    //11: Pop something off the stack
-  ARG,    //12: Push an argument onto the call stack
-  CALL,   //13: Call something
-  CMP,    //14: Compare two registers
-  RET,    //15: Return from a sub routine
-  FN,     //16: Function label
-  DO,     //17: Call a function label
-  LBL,    //18: A label (15)
-  
-  //JUMPS
-  JMP,    //19: Do a jump
-  JL,     //20: Jump if less than
-  JG,     //21: Jump if greater than
-  JE,     //22: Jump if equals
-  JN,     //23: Jump if not equals
-  JLE,    //24: Jump if less than or equal
-  JGE,    //25: Jump if greater than or equal
-  
-};
+////////////////////////////////////////////////////////////////////////////////
 
 //Describes a comparison result
 enum CompareResult {
@@ -123,33 +86,6 @@ enum CompareResult {
   NEQUAL
 };
 
-//Register
-enum Operand {
-  R_NONE = 0,
-
-  //16-bit registers
-  R_AS, //1
-  R_BS, //2
-  R_CS, //3
-  R_DS, //4
-
-  //32-bit registers
-  R_II, //5
-  R_JI, //6
-  R_KI, //7
-  R_LI, //8
-
-  //Float registers
-  R_XF, //9
-  R_YF, //10
-  R_ZF, //11
-  R_WF, //12
-
-  R_SH, //13: Short constant follows
-  R_FL, //14: Float constant follows
-  R_IN, //15: Int constant follows
-
-};
 
 //Contains the current state of a VM
 typedef struct VM {
@@ -162,6 +98,10 @@ typedef struct VM {
 
   //Our symbols
   short symbols[MAX_SYMBOLS];
+  //Our stack
+  double stack[MAX_STACK_SIZE];
+  //Stack pointer
+  int stackPointer;
 
   //The program we're currently running
   short program[MAX_PROGRAM_SIZE];
@@ -172,12 +112,18 @@ typedef struct VM {
 
   //Stores the result of the last compare preformed
   CompareResult lastCmp;
-  //The cursor before a jump
+
+  //The cursor before a jump *REPLACE WITH CALLSTACK*
   int beforeCursor;
+
+  //Callstack
+  int callstack[MAX_CALLSTACK];
+  int callstackPointer;
 
 } VM;
 
 ////////////////////////////////////////////////////////////////////////////////
+//The following are utility functions to make things a bit more tidy
 
 //Read two bytes from the program and return it
 inline short vm_read2b(VM &v) {
@@ -226,7 +172,12 @@ inline void regw(Operand opa, VM &v, float val) {
 //refactored into a separate function to avoid too much code repetition.
 inline void jmp(int where, VM &v) {
   if (v.symbols[where] < v.programSize) {
-    v.beforeCursor = v.programCursor;
+   // v.beforeCursor = v.programCursor;
+    
+    //Add the jump to the call stack
+   // v.callstack[v.callstackPointer] = v.programCursor;
+   // v.callstackPointer++;
+
     v.programCursor = v.symbols[where];
 
     DEBUG_PLOG(("Jumped to %i\n", v.programCursor));
@@ -235,15 +186,17 @@ inline void jmp(int where, VM &v) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-//Prepare a VM 
-void dvm_vm_clear(VM &v) {
-  v.programSize = 0;
-  v.programCursor = 0;
-}
-
 //Reset the program within a vm
 void dvm_vm_reset(VM &v) {
   v.programCursor = 0;
+  v.stackPointer = 0;
+  v.callstackPointer = 0;
+}
+
+//Prepare a VM 
+void dvm_vm_clear(VM &v) {
+  v.programSize = 0;
+  dvm_vm_reset(v);
 }
 
 //Run the program in a vm
@@ -308,6 +261,54 @@ void dvm_run(VM &v) {
         DEBUG_PLOG(("CMP %f with %f\n", lValue, rValue));
     
         break;
+
+      //Push a register or a value onto the stack
+      case PUSH:    
+        if (opa > 0) {
+          v.stack[v.stackPointer] = lValue;
+          v.stackPointer++;
+
+          DEBUG_PLOG(("PUSH %f onto stack\n", lValue));
+        }
+        break;
+      
+      //Pop the top item of the stack and put it in a register
+      case POP: 
+        if (v.stackPointer > 0 && opa > 0 && opa < 13) {
+          v.stackPointer--;
+          regw(opa, v, v.stack[v.stackPointer]);
+
+          DEBUG_PLOG(("POP into %i\n", opa));
+
+        }
+        break;
+
+      //Return from a jump or function call
+      case RET:
+        if (v.callstackPointer > 0) {
+          v.callstackPointer--;
+          v.programCursor = v.callstack[v.callstackPointer];
+
+          DEBUG_PLOG(("RETURNED to %i\n", v.programCursor));
+
+        }
+
+        break;
+
+      case DO:
+        if (v.symbols[lbyte] < v.programSize) {
+          //Add the jump to the call stack
+          v.callstack[v.callstackPointer] = v.programCursor;
+          v.callstackPointer++;
+
+          v.programCursor = v.symbols[lbyte];
+
+          DEBUG_PLOG(("Doing subroutine at %i\n", v.programCursor));
+        }
+        break;
+      
+      //////////////////////////////////////////////////////////////////////////
+      //Here come the jumps
 
       //Jump if less than
       case JL:  
