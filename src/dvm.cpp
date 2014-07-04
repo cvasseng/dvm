@@ -63,13 +63,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //If enabled, the VM will log everything it does to stdout
 #ifdef PROGRAM_LOG
+#   include <stdio.h>
 #   define DEBUG_PLOG(x) printf x
 #else
 #   define DEBUG_PLOG(x) do {} while (0)
 #endif
 
 #include <string.h>
-#include <stdio.h>
 
 #include "dvm.h"
 #include "types.h"

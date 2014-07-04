@@ -37,9 +37,9 @@ enum Instruction {
   //MATH OPERATIONS
   ADD,    //1: Add something to a register
   INC,    //2: Increase the value in a register
-  SUB,    //3: Subtract something from a register
-  MUL,    //4: Decrease the value in a register
-  DEC,    //5: Decrease the value in a register
+  DEC,    //3: Decrease the value in a register
+  SUB,    //4: Subtract something from a register
+  MUL,    //5: Decrease the value in a register
   DIV,    //6: Divide
   SIN,    //7: Sin
   COS,    //8: Cos

@@ -5,6 +5,8 @@ A small virtual machine written in C/C++.
 
 The implementation is written to be easy to read and understand, and to be small (both in terms of the bytecode it runs on, and for the implementation). 
 
+# Why
+
 # Features
  * Sub routines
  * C functions can be bound and called from the VM
@@ -12,6 +14,8 @@ The implementation is written to be easy to read and understand, and to be small
  * Supports 16 and 32-bit integers as well as floats
  * 12 registers (4x 16 bit, 4x 32 bit, 4x float)
  * Comes with a compiler that compiles assembly-ish syntax to bytecode
+ * Does not require Boost or any other bloated libraries (the VM itself only rely on string.h, stdio.h (if logging is enabled) and math.h)
+ * The VM core is less than 500 lines of well-commented code
 
 # Example program
 
@@ -38,6 +42,46 @@ In byte code the program looks like this:
     0x1400            ;jl loop
 
 # Usage
+
+## Built-in functions
+
+todo
+
+## Build-Time Defines 
+
+There are a couple of defines you can use to specify how much (if any) logging
+you want to have from the vm. If `PROGRAM_LOG` is set, the VM will spit out 
+information for each instruction it executes, which can sometimes be useful
+for debugging.
+
+## Supported Operations
+This is a list of all the supported operations in the VM itself. 
+
+### Mathematical operations
+ * Add - Basic mathematical add. Can be used to add one register to another, or 
+ to add a constant number to the value of a register
+ * Inc - Increments the value in a register by one
+ * Dec - Decrements the value of a register by one
+ * Sub - Subtracts the value in a register by one
+ * Mul - Multiplies the value in a register by either a constant value or the value in a second register
+ * Div - Divides the value in a register by either a constant value or the value in a second register
+
+### Jumps
+ * Jmp - Regular jump
+ * Jl - Jump if last comparison was less than
+ * Jg - Jump if last comparison was greater than
+ * Je - Jump if last comparison was equal
+ * Jn - Jump if last comparison was not equal
+ * Jle - Jump if last comparison was less than or equal
+ * Jge - Jump if last comparison was greater than or equal
+
+## Bytecode Details
+
+todo
+
+# The DVM assembly language
+
+todo
 
 # License
 
