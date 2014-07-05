@@ -1,7 +1,7 @@
 dvm
 ===
 
-A small virtual machine written in C/C++.
+A small register based virtual machine written in C/C++.
 
 The implementation is written to be easy to read and understand, and to be small (both in terms of the bytecode it runs on, and for the implementation). 
 
@@ -11,8 +11,11 @@ I built it because I needed a small lightweight virtual machine for one of my ow
 people, both in terms of serving an educational purpose and also as a very
 lean alternative/starting point for doing scripting in C/C++ applications.
 
+It's written to be as readable as possible, and to have compact bytecode size wise.
+
 # Features
  * Sub routines
+ * Processing can be chunked, i.e. it can be paused and resumed at any time
  * C functions can be bound and called from the VM
  * Mathematical operations (sin, cos, etc.)
  * Supports 16 and 32-bit integers as well as floats
@@ -67,8 +70,19 @@ Example:
       return 0;
     }
 
+## Using As Standalone Runtime
 
-## Built-in functions
+todo 
+
+## Build-Time Defines 
+
+There are a couple of defines you can use to specify how much (if any) logging
+you want to have from the vm. If `PROGRAM_LOG` is set, the VM will spit out 
+information for each instruction it executes, which can sometimes be useful
+for debugging.
+
+
+## Built-in Functions
 
 There are a few pre-defined C bindings enabled by default. These are 
  * `printf` - will do `printf("%i %i %i...", arg1, arg2, arg3, ...)`
@@ -80,17 +94,10 @@ They're called as such in DVM ASM:
     call printf ;printf(as, bs)
 
 
-## Build-Time Defines 
-
-There are a couple of defines you can use to specify how much (if any) logging
-you want to have from the vm. If `PROGRAM_LOG` is set, the VM will spit out 
-information for each instruction it executes, which can sometimes be useful
-for debugging.
-
 ## Supported Operations
 This is a list of all the supported operations in the VM itself. 
 
-### Mathematical operations
+### Mathematical Operations
  * Add - Basic mathematical add. Can be used to add one register to another, or 
  to add a constant number to the value of a register
  * Inc - Increments the value in a register by one
@@ -127,7 +134,7 @@ register type on the left side. The registers ending in s are all 16-bit
 (`as bs cs ds`), the registers ending in i are all 32-bit (`ii ji ki li`), and
 the registers ending in f are all floats (`xf, yf, zf, wf`).
 
-## Adding new operations
+## Adding new Operations
 
 Adding new operations is fairly simple. There's no need to change the parser/compiler
 to make it work, other than adding your operation to `ins_name_to_num` in
@@ -135,13 +142,9 @@ to make it work, other than adding your operation to `ins_name_to_num` in
 it must be added to the `Instruction` enum in `types.h`, and the logic must be
 implemented in the `switch` in `dvm_run` in `dvm.cpp`. That's pretty much it.
 
-# The DVM assembly language
+# The DVM Assembly Language
 
 The syntax is loosly based on NASM syntax.
-
-# Integrating in C/C++ applications
-
-todo
 
 # Further reading
 
