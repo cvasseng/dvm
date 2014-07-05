@@ -64,6 +64,10 @@ enum Instruction {
   JN,     //23: Jump if not equals
   JLE,    //24: Jump if less than or equal
   JGE,    //25: Jump if greater than or equal
+
+  //IO
+  PRINT,	//Print
+  PRINTL, //Print line
   
 };
 

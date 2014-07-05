@@ -86,7 +86,6 @@ enum CompareResult {
   NEQUAL
 };
 
-
 //Contains the current state of a VM
 typedef struct VM {
   //int16 registers
@@ -107,14 +106,12 @@ typedef struct VM {
   short program[MAX_PROGRAM_SIZE];
   //The program cursor - our position within the program array
   int programCursor;
-  //The size of the program in memory
+  //The size of the program in memory. 
+  //This is the number of elements in the program array, not bytes.
   int programSize;
 
   //Stores the result of the last compare preformed
   CompareResult lastCmp;
-
-  //The cursor before a jump *REPLACE WITH CALLSTACK*
-  int beforeCursor;
 
   //Callstack
   int callstack[MAX_CALLSTACK];
@@ -168,12 +165,40 @@ inline void regw(Operand opa, VM &v, float val) {
   }
 }
 
+//Read the value from a register
+inline float regr(Operand opa, VM &v) {
+  if (opa > 0) {
+    if (opa < 5) {
+      return v.int16Reg[opa];
+    } else if (opa < 9) {
+      return v.int32Reg[opa];
+    } else if (opa < 13) {
+      return v.floatReg[opa];
+    }
+  }
+  return -1.1337f;
+}
+
 //Preform a jump in the program. This is repeated quite a lot, so it's 
 //refactored into a separate function to avoid too much code repetition.
 inline void jmp(int where, VM &v) {
   if (v.symbols[where] < v.programSize) {
     v.programCursor = v.symbols[where];
     DEBUG_PLOG(("Jumped to %i\n", v.programCursor));
+  }
+}
+
+//Push a value onto the stack
+inline void push(VM &v, float val) {
+  v.stack[v.stackPointer] = val;
+  v.stackPointer++;
+}
+
+//Pop a value off of the stack and into a register
+inline void pop(VM &v, Operand target) {
+  if (v.stackPointer > 0 && target > 0 && target < 13) {
+    v.stackPointer--;
+    regw(target, v, v.stack[v.stackPointer]);
   }
 }
 
@@ -249,21 +274,18 @@ void dvm_run(VM &v) {
       //Push a register or a value onto the stack
       case PUSH:    
         if (opa > 0) {
-          v.stack[v.stackPointer] = lValue;
-          v.stackPointer++;
+          push(v, lValue);
 
-          DEBUG_PLOG(("PUSH %f onto stack\n", lValue));
+          DEBUG_PLOG(("PUSH %f onto stack\n", lValue));   
         }
         break;
       
       //Pop the top item of the stack and put it in a register
       case POP: 
         if (v.stackPointer > 0 && opa > 0 && opa < 13) {
-          v.stackPointer--;
-          regw(opa, v, v.stack[v.stackPointer]);
+          pop(v, opa);
 
           DEBUG_PLOG(("POP into %i\n", opa));
-
         }
         break;
 
@@ -273,14 +295,23 @@ void dvm_run(VM &v) {
           v.callstackPointer--;
           v.programCursor = v.callstack[v.callstackPointer];
 
-          DEBUG_PLOG(("RETURNED to %i\n", v.programCursor));
+          //Pop all the registers
+          for (int i = 12; i > 0; i--) {
+            pop(v, Operand(i));
+          }
 
+          DEBUG_PLOG(("RETURNED to %i\n", v.programCursor));
         }
 
         break;
 
       case DO:
         if (v.symbols[lbyte] < v.programSize) {
+          //Push all the registers onto the stack
+          for (int i = 1; i < 13; i++) {
+            push(v, regr(Operand(i), v));
+          }
+
           //Add the jump to the call stack
           v.callstack[v.callstackPointer] = v.programCursor;
           v.callstackPointer++;
@@ -289,6 +320,25 @@ void dvm_run(VM &v) {
 
           DEBUG_PLOG(("Doing subroutine at %i\n", v.programCursor));
         }
+        break;
+
+      case PRINT:
+        if (opa > 0) {
+          printf("%f ", lValue);
+        }
+        if (opb > 0) {
+          printf("%f ", rValue);
+        }
+        break;
+
+      case PRINTL:
+        if (opa > 0) {
+          printf("%f ", lValue);
+        }
+        if (opb > 0) {
+          printf("%f ", rValue);
+        }
+        printf("\n");
         break;
       
       //////////////////////////////////////////////////////////////////////////
@@ -347,7 +397,6 @@ void dvm_run(VM &v) {
           DEBUG_PLOG(("DIV %f by %f in reg %i", lValue, rValue, opa));
         }
         break;
-
 
       //////////////////////////////////////////////////////////////////////////
       //Here come the jumps

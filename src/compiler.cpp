@@ -68,6 +68,8 @@ Instruction ins_name_to_num(std::string str) {
   if (str ==  "COS")    return COS;
   if (str ==  "POP")    return POP;
   if (str ==  "ARG")    return ARG;
+  if (str ==  "PRINT")    return PRINT;
+  if (str ==  "PRINTL")    return PRINTL;
 
   return NOP;
 }
