@@ -5,17 +5,11 @@ A small register based virtual machine written in C/C++.
 
 The implementation is written to be easy to read and understand, and to be small (both in terms of the bytecode it runs on, and for the implementation). 
 
-# Why
-
-I built it because I needed a small lightweight virtual machine for one of my own projects. Existing projects were generally way too large for my use case which was size limited. Once I started writing it I figured it might be useful for other 
-people, both in terms of serving an educational purpose and also as a very
-lean alternative/starting point for doing scripting in C/C++ applications.
-
-It's written to be as readable as possible, and to have compact bytecode size wise.
+Might be useful for educational purposes, or as a starting point/inspiration
+for a more complete VM.
 
 # Features
  * Sub routines
- * Processing can be chunked, i.e. it can be paused and resumed at any time
  * C functions can be bound and called from the VM
  * Mathematical operations (sin, cos, etc.)
  * Supports 16 and 32-bit integers as well as floats
@@ -23,8 +17,7 @@ It's written to be as readable as possible, and to have compact bytecode size wi
  * Comes with a simple parser/compiler that compiles assembly-ish syntax to bytecode
  * Does not require Boost or any other bloated libraries (the VM itself only rely on string.h, stdio.h (if logging is enabled) and math.h)
  * The VM core is less than 500 lines of well-commented code
- * String support and memory access with 16-bit addressing is coming
-
+ 
 # Example program
 
 This is an example of a program written in assembly-ish syntax 
@@ -70,9 +63,18 @@ Example:
       return 0;
     }
 
-## Using As Standalone Runtime
+### Binding C functions to the VM
 
-todo 
+Functions can be binded to the VM by using the `void dvm_include()` function in `dvm.h`. This function accepts two arguments - a numeric ID unique for the function (0..255) and a pointer to a function with the signature `void fn(float *args, int argc);`.
+
+C functions are called as such in DVM ASM:
+    symbol printf,<id>  ;allows us to use a string instead of a number when calling it
+
+    arg as      ;push as onto the argument stack
+    arg bs      ;push bs onto the argument stack
+    call printf ;printf(as, bs)
+    
+
 
 ## Build-Time Defines 
 
@@ -81,21 +83,22 @@ you want to have from the vm. If `PROGRAM_LOG` is set, the VM will spit out
 information for each instruction it executes, which can sometimes be useful
 for debugging.
 
-
-## Built-in Functions
-
-There are a few pre-defined C bindings enabled by default. These are 
- * `printf` - will do `printf("%i %i %i...", arg1, arg2, arg3, ...)`
-
-They're called as such in DVM ASM:
-    
-    arg as      ;push as onto the argument stack
-    arg bs      ;push bs onto the argument stack
-    call printf ;printf(as, bs)
-
-
 ## Supported Operations
 This is a list of all the supported operations in the VM itself. 
+
+### General
+ * MOV - Move a value (literal or contents of a register) into a register. Note: syntax is destination,source.
+ * Push - Push a value onto the stack (either a literal or a register)
+ * Pop - Pop the top item off of the stack and into a register
+ * Call - Call a C function
+ * Cmp - Compare two values (or registers)
+ * Ret - Return from a sub-routine
+ * Fn - Sub routine function declaration
+ * Do - Call a sub-routine
+
+### I/O
+  * Print - Prints a literal or the contents of a register
+  * Printl - Same as print, but adds a newline
 
 ### Mathematical Operations
  * Add - Basic mathematical add. Can be used to add one register to another, or 
@@ -144,11 +147,10 @@ implemented in the `switch` in `dvm_run` in `dvm.cpp`. That's pretty much it.
 
 # The DVM Assembly Language
 
-The syntax is loosly based on NASM syntax.
+The syntax is loosly based on NASM syntax. This means that in general the 
+destination for an operation is defined first on operations, e.g. `mov destination,source`, `add destination,what`.
 
-# Further reading
-
-todo
+Literals must be prefixed with `#`, e.g. `mov bs,#10` will move the number 10 into register `bs`.
 
 # License
 
