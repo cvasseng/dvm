@@ -123,12 +123,12 @@ typedef struct VM {
 //The following are utility functions to make things a bit more tidy
 
 //Read two bytes from the program and return it
-inline short vm_read2b(VM &v) {
+inline short read2b(VM &v) {
   return v.program[++v.programCursor];  
 }
 
 //Read four bytes from the program and return it
-inline int vm_read4b(VM &v) {
+inline int read4b(VM &v) {
   return v.program[++v.programCursor] << 8 | v.program[++v.programCursor];
 }
 
@@ -143,10 +143,10 @@ inline float vm_getOperandValue(Operand opa, VM &v) {
       return v.floatReg[opa];
     } else if (opa == 13) {
       //Read 2 bytes
-      return vm_read2b(v);
+      return read2b(v);
     } else {
       //Read 4 bytes
-      return vm_read4b(v);
+      return read4b(v);
     }
   }
   return -1.1337f;
