@@ -119,6 +119,8 @@ typedef struct VM {
 
 } VM;
 
+DWMFN dvm_functions[256];
+
 ////////////////////////////////////////////////////////////////////////////////
 //The following are utility functions to make things a bit more tidy
 
@@ -133,7 +135,7 @@ inline int read4b(VM &v) {
 }
 
 //Get the value of an operand relative to current program cursor
-inline float vm_getOperandValue(Operand opa, VM &v) {
+inline float getOperandVal(Operand opa, VM &v) {
   if (opa > 0) {
     if (opa < 5) {
       return v.int16Reg[opa];
@@ -217,6 +219,10 @@ void dvm_vm_clear(VM &v) {
   dvm_vm_reset(v);
 }
 
+void dvm_include(unsigned char id, DVMFN fn) {
+  dvm_functions[id] = fn;
+}
+
 //Run the program in a vm
 void dvm_run(VM &v) {
   Instruction ins;
@@ -246,8 +252,8 @@ void dvm_run(VM &v) {
     opb = Operand( c & 0x000F);           //Right side operand
     lbyte = c & 0x00FF;                   //Symbol 
 
-    lValue = vm_getOperandValue(opa, v);
-    rValue = vm_getOperandValue(opb, v);
+    lValue = getOperandVal(opa, v);
+    rValue = getOperandVal(opb, v);
 
     switch (ins) {
       
@@ -305,6 +311,19 @@ void dvm_run(VM &v) {
 
         break;
 
+      //Call a C-function
+      case CALL:
+        if (opa > 12) {
+          int id = (int)lValue;
+          if (dvm_functions[id]) {
+            (*dvm_functions[id])(v.stack, v.stackPointer);
+          }
+        } else {
+          DEBUG_PLOG("ERROR: Invalid call to " + lValue);
+        }
+        break;
+
+      //Call a sub routine
       case DO:
         if (v.symbols[lbyte] < v.programSize) {
           //Push all the registers onto the stack
@@ -331,6 +350,7 @@ void dvm_run(VM &v) {
         }
         break;
 
+      //
       case PRINTL:
         if (opa > 0) {
           printf("%f ", lValue);

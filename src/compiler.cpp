@@ -41,35 +41,35 @@ Instruction ins_name_to_num(std::string str) {
   //Instructions are not case sensitive
   std::transform(str.begin(), str.end(),str.begin(), ::toupper);
 
-  if (str == "NOP")     return NOP;
-  if (str ==  "ADD")    return ADD;   
-  if (str ==  "INC")    return INC;   
-  if (str ==  "SUB")    return SUB;   
-  if (str ==  "MOV")    return MOV;   
-  if (str ==  "PUSH")   return PUSH;  
-  if (str ==  "CALL")   return CALL;    
-  if (str ==  "CMP")    return CMP;   
-  if (str ==  "JMP")    return JMP;   
-  if (str ==  "JL")     return JL;  
-  if (str ==  "JG")     return JG;  
-  if (str ==  "JE")     return JE;  
-  if (str ==  "JN")     return JN;  
-  if (str ==  "JLE")    return JLE; 
-  if (str ==  "JGE")    return JGE; 
-  if (str ==  "LBL")    return LBL; 
-  if (str ==  "BREAK")  return RET;
-  if (str ==  "RET")    return RET;
-  if (str ==  "DO")     return DO;
-  if (str ==  "FN")     return FN;
-  if (str ==  "DEC")    return DEC;
-  if (str ==  "MUL")    return MUL;
-  if (str ==  "DIV")    return DIV;
-  if (str ==  "SIN")    return SIN;
-  if (str ==  "COS")    return COS;
-  if (str ==  "POP")    return POP;
-  if (str ==  "ARG")    return ARG;
-  if (str ==  "PRINT")    return PRINT;
-  if (str ==  "PRINTL")    return PRINTL;
+  if (str == "NOP")    return NOP;
+  if (str == "ADD")    return ADD;   
+  if (str == "INC")    return INC;   
+  if (str == "SUB")    return SUB;   
+  if (str == "MOV")    return MOV;   
+  if (str == "PUSH")   return PUSH;  
+  if (str == "CALL")   return CALL;    
+  if (str == "CMP")    return CMP;   
+  if (str == "JMP")    return JMP;   
+  if (str == "JL")     return JL;  
+  if (str == "JG")     return JG;  
+  if (str == "JE")     return JE;  
+  if (str == "JN")     return JN;  
+  if (str == "JLE")    return JLE; 
+  if (str == "JGE")    return JGE; 
+  if (str == "LBL")    return LBL; 
+  if (str == "BREAK")  return RET;
+  if (str == "RET")    return RET;
+  if (str == "DO")     return DO;
+  if (str == "FN")     return FN;
+  if (str == "DEC")    return DEC;
+  if (str == "MUL")    return MUL;
+  if (str == "DIV")    return DIV;
+  if (str == "SIN")    return SIN;
+  if (str == "COS")    return COS;
+  if (str == "POP")    return POP;
+  if (str == "ARG")    return ARG;
+  if (str == "PRINT")  return PRINT;
+  if (str == "PRINTL") return PRINTL;
 
   return NOP;
 }
@@ -180,11 +180,10 @@ void parse_line(Program &p, std::vector<std::string> &l) {
 
       //Is it a number?
       if (l[i][0] == '#') {
-        //We need to figure out which type to use based on the previous register
+        //TODO: We need to figure out which type to use based on the previous register
         std::stringstream ss(l[i].substr(1));
         short num = 0;
         ss >> num ;
-        //memcpy(&p.program[++p.programSize], &num, sizeof(float));
 
         p.program[p.programSize] |= (char)R_SH << (i == 1 ? 4 : 0);
         p.program[++p.programSize] = num;
@@ -208,7 +207,6 @@ ProgramSource dvm_compile(const char* filename) {
   }
 
   Program prog;
-  
   
   char c;
   bool inString = false;
@@ -245,6 +243,7 @@ ProgramSource dvm_compile(const char* filename) {
   if (token.size() > 0) {
     line.push_back(token);
   }
+
   if (line.size() > 0) {
     parse_line(prog, line);
   }

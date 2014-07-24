@@ -68,12 +68,15 @@ Example:
 Functions can be binded to the VM by using the `void dvm_include()` function in `dvm.h`. This function accepts two arguments - a numeric ID unique for the function (0..255) and a pointer to a function with the signature `void fn(float *args, int argc);`.
 
 C functions are called as such in DVM ASM:
+
     symbol printf,<id>  ;allows us to use a string instead of a number when calling it
 
     arg as      ;push as onto the argument stack
     arg bs      ;push bs onto the argument stack
     call printf ;printf(as, bs)
     
+Notice the `symbol` keyword - this isn't used in the bytecode, but is 
+used by the parser as an alias.     
 
 
 ## Build-Time Defines 

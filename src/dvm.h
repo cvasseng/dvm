@@ -30,12 +30,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef h__dvm__
 #define h__dvm__
 
-struct ProgramSource {
-	short program[2048];
-	int programSize;
-};
+	struct ProgramSource {
+		short program[2048];
+		int programSize;
+	};
 
-extern void dvm_run(const short *prog, unsigned int size);
-extern ProgramSource dvm_compile(const char* filename);
+	typedef void (*DVMFN)(int *stack, int size);
+
+	extern void dvm_run(const short *prog, unsigned int size);
+	extern ProgramSource dvm_compile(const char* filename);
+	extern void dvm_include(unsigned char id, DVMFN fn);
 
 #endif
